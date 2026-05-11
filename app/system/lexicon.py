@@ -86,6 +86,27 @@ LEXICON_MESSAGES = {
     "ref_notify_referrer": "🎉 Ваш друг {first_name} присоединился по вашей ссылке! Вам начислен 1 бонусный кредит.",
     "ref_bonus_purchase": "🎁 Вам начислено {bonus} кредитов за покупку друга!",
     "ref_link_info": "🔗 <b>Ваша реферальная ссылка:</b>\n<code>https://t.me/FotosessII_testtest_robot?start=ref_{tg_id}</code>\n\n👥 Приглашено друзей: {invited}\n🎁 Заработано бонусов: {bonus}\n\nЗа каждого нового друга вы получите бонусные кредиты при его покупках (1 кредит за каждые 5 купленных другом).",
+    
+    # Админ-панель
+    "adm_panel": "🔧 <b>Админ-панель</b>",
+    "adm_no_access": "⛔ Нет доступа.",
+    "adm_broadcast_text": "📝 Отправьте текст рассылки:",
+    "adm_broadcast_media": "📎 Отправьте одно фото или одно видео:",
+    "adm_broadcast_confirm": "Запустить рассылку?",
+    "adm_broadcast_done": "✅ Рассылка завершена: {sent}/{total}",
+    "adm_broadcast_cancel": "❌ Рассылка отменена.",
+    "adm_post_text": "📝 Отправьте текст поста:",
+    "adm_post_media": "📎 Отправьте медиа (фото/видео, до 10 файлов).\nПосле отправки всех файлов нажмите кнопку «Готово».",
+    "adm_post_confirm": "Опубликовать пост?",
+    "adm_post_done": "✅ Пост опубликован!",
+    "adm_post_cancel": "❌ Публикация отменена.",
+    "adm_credits_ask_id": "Введите TG_ID пользователя:",
+    "adm_credits_ask_amount": "Введите количество кредитов:",
+    "adm_credits_added": "✅ Начислено {amount} кредитов пользователю {tg_id}. Баланс: {balance}.",
+    "adm_credits_removed": "✅ Списано {amount} кредитов у пользователя {tg_id}. Баланс: {balance}.",
+    "adm_credits_not_found": "❌ Пользователь с TG_ID {tg_id} не найден.",
+    "adm_credits_invalid": "❌ Некорректный ввод. Введите число.",
+    "adm_cancelled": "❌ Действие отменено.",
 }
 
 # Словарь текстов кнопок
@@ -142,4 +163,14 @@ LEXICON_BUTTONS = {
     "btn_tier_1000": "🔥 1000 ⭐ — 150 кредитов 🔥",
     
     "btn_invite_friend": "👥 Пригласить друга",
+    
+    # Админ-панель
+    "btn_adm_broadcast": "📢 Рассылка в бот",
+    "btn_adm_post": "📣 Пост в канал",
+    "btn_adm_add_credits": "➕ Начислить кредиты",
+    "btn_adm_remove_credits": "➖ Списать кредиты",
+    "btn_adm_start": "▶️ Начать",
+    "btn_adm_publish": "🚀 Опубликовать",
+    "btn_adm_no": "❌ Нет",
+    "btn_adm_done_media": "✅ Готово",
 }

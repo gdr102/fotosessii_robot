@@ -5,13 +5,14 @@ from aiogram.fsm.storage.memory import MemoryStorage
 
 from app.system.config import TOKEN_TG
 from app.database.models import async_main
-from app.handlers import start, profile, orders, history, creative, payment, moderation, menu
+from app.handlers import start, profile, orders, history, creative, payment, moderation, menu, admin
 
 
 def create_dispatcher() -> Dispatcher:
     storage = MemoryStorage()
     dispatcher = Dispatcher(storage=storage)
     dispatcher.include_routers(
+        admin.router,
         payment.router,      
         start.router,
         profile.router,

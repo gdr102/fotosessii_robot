@@ -400,3 +400,10 @@ async def get_referral_stats(tg_id: int):
         invited_count = len(referrals)
         total_bonus = sum(r.bonus_given for r in referrals)
         return invited_count, total_bonus
+
+
+async def get_all_user_tg_ids() -> list[int]:
+    """Возвращает список tg_id всех пользователей для рассылки."""
+    async with async_session() as session:
+        result = await session.execute(select(db.User.tg_id))
+        return [row[0] for row in result.all()]

@@ -141,7 +141,8 @@ async def admin_publish_final(callback: types.CallbackQuery):
 
     post_kb = types.InlineKeyboardMarkup(inline_keyboard=[
         [types.InlineKeyboardButton(text=LEXICON_BUTTONS["btn_pub_apply"],
-                              url=f"https://t.me/FotosessII_robot?start={prompt_id}")]
+                              url=f"https://t.me/FotosessII_robot?start={prompt_id}",
+                              style="danger")]
     ])
 
     final_caption = LEXICON_MESSAGES["pub_final"].format(
