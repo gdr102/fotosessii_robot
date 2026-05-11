@@ -290,3 +290,113 @@ async def share_last_user_prompt(tg_id: int, file_id: str):
         await session.commit()
         await session.refresh(new_prompt)
         return new_prompt.id
+
+
+async def link_referral(referrer_tg_id: int, referred_tg_id: int) -> bool:
+    """Привязывает реферала к рефереру. Возвращает True при успехе."""
+    if referrer_tg_id == referred_tg_id:
+        return False
+
+    async with async_session() as session:
+        existing = await session.scalar(
+            select(db.Referral).where(db.Referral.referred_tg_id == referred_tg_id)
+        )
+        if existing:
+            return False
+
+        referrer = await session.scalar(
+            select(db.User).where(db.User.tg_id == referrer_tg_id)
+        )
+        if not referrer:
+            return False
+
+        current_tg_id = referrer_tg_id
+        visited = {referred_tg_id}
+        while current_tg_id is not None:
+            if current_tg_id in visited:
+                return False
+            visited.add(current_tg_id)
+            user = await session.scalar(
+                select(db.User).where(db.User.tg_id == current_tg_id)
+            )
+            if not user:
+                break
+            current_tg_id = user.referred_by
+
+        new_referral = db.Referral(
+            referrer_tg_id=referrer_tg_id,
+            referred_tg_id=referred_tg_id,
+            bonus_given=0,
+            timestamp=get_msk_time()
+        )
+        session.add(new_referral)
+
+        await session.execute(
+            update(db.User)
+            .where(db.User.tg_id == referred_tg_id)
+            .values(referred_by=referrer_tg_id)
+        )
+
+        await session.commit()
+        return True
+
+
+async def process_referral_bonus(referred_tg_id: int):
+    """Начисляет бонус рефереру при покупке реферала.
+    Возвращает (referrer_tg_id, bonus) или None.
+    """
+    async with async_session() as session:
+        referral = await session.scalar(
+            select(db.Referral).where(db.Referral.referred_tg_id == referred_tg_id)
+        )
+        if not referral:
+            return None
+
+        referred_user = await session.scalar(
+            select(db.User).where(db.User.tg_id == referred_tg_id)
+        )
+        if not referred_user:
+            return None
+
+        result = await session.execute(
+            select(db.Order)
+            .where(
+                db.Order.user_id == referred_user.id,
+                db.Order.status == 'completed'
+            )
+        )
+        orders = result.scalars().all()
+        total_purchased = sum(o.purchased_credits for o in orders)
+
+        earned = total_purchased // 5
+        to_give = earned - referral.bonus_given
+
+        if to_give <= 0:
+            return None
+
+        referrer_tg_id = referral.referrer_tg_id
+
+        await session.execute(
+            update(db.Referral)
+            .where(db.Referral.id == referral.id)
+            .values(bonus_given=earned)
+        )
+        await session.execute(
+            update(db.User)
+            .where(db.User.tg_id == referrer_tg_id)
+            .values(credits=db.User.credits + to_give)
+        )
+        await session.commit()
+        return referrer_tg_id, to_give
+
+
+async def get_referral_stats(tg_id: int):
+    """Возвращает (invited_count, total_bonus) для профиля."""
+    async with async_session() as session:
+        result = await session.execute(
+            select(db.Referral).where(db.Referral.referrer_tg_id == tg_id)
+        )
+        referrals = result.scalars().all()
+        invited_count = len(referrals)
+        total_bonus = sum(r.bonus_given for r in referrals)
+        return invited_count, total_bonus

@@ -8,6 +8,7 @@ from app.database.requests import (
     complete_order,
     get_order_by_payment_id,
     get_pending_order,
+    process_referral_bonus,
 )
 from app.functions.navigation import safe_navigate_text
 from app.keyboards.common_kb import menu_kb
@@ -71,7 +72,7 @@ async def buy_credits_amount(callback: types.CallbackQuery):
     await create_order(callback.from_user.id, stars, credits, invoice_payload)
 
 
-    prices = [LabeledPrice(label=f"Пополнение {stars} ⭐ ({credits} кредитов)", amount=stars)]
+    prices = [LabeledPrice(label=f"Пополнение {stars} ⭐ ({credits} кредитов)", amount=1)] # заменить на stars
 
     try:
         await callback.message.answer_invoice(
@@ -131,3 +132,14 @@ async def successful_payment_handler(message: types.Message):
         reply_markup=await menu_kb(),
         message_effect_id="5159385139981059251"
     )
+
+    ref_result = await process_referral_bonus(message.from_user.id)
+    if ref_result:
+        referrer_tg_id, bonus = ref_result
+        try:
+            await message.bot.send_message(
+                referrer_tg_id,
+                LEXICON_MESSAGES["ref_bonus_purchase"].format(bonus=bonus)
+            )
+        except Exception:
+            pass

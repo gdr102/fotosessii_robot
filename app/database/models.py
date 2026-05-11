@@ -1,5 +1,5 @@
 from typing import List
-from sqlalchemy import BigInteger, ForeignKey, String
+from sqlalchemy import BigInteger, ForeignKey, String, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.ext.asyncio import AsyncAttrs, async_sessionmaker, create_async_engine
 
@@ -20,6 +20,7 @@ class User(Base):
     username: Mapped[str | None] = mapped_column(String)
     first_name: Mapped[str | None] = mapped_column(String)
     credits: Mapped[int] = mapped_column(default=2)
+    referred_by: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
     register_date: Mapped[str] = mapped_column(nullable=False)
 
     orders: Mapped[List["Order"]] = relationship(
@@ -77,6 +78,20 @@ class History(Base):
 
     user: Mapped["User"] = relationship(back_populates="history")
 
+class Referral(Base):
+    __tablename__ = 'referrals'
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    referrer_tg_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    referred_tg_id: Mapped[int] = mapped_column(BigInteger, nullable=False, unique=True)
+    bonus_given: Mapped[int] = mapped_column(default=0)
+    timestamp: Mapped[str] = mapped_column(nullable=False)
+
 async def async_main():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+        result = await conn.execute(text("PRAGMA table_info(users)"))
+        columns = [row[1] for row in result]
+        if "referred_by" not in columns:
+            await conn.execute(text("ALTER TABLE users ADD COLUMN referred_by BIGINT"))

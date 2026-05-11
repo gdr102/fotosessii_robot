@@ -5,7 +5,7 @@ from aiogram.fsm.context import FSMContext
 
 from app.keyboards.common_kb import menu_kb
 from app.keyboards.start_kb import start_kb
-from app.database.requests import create_user
+from app.database.requests import create_user, link_referral, update_balance
 from app.functions.get_date import get_msk_time
 from app.system.lexicon import LEXICON_MESSAGES, LEXICON_BUTTONS
 from app.system.config import ADMIN_PUBLIC_CHANNEL_ID
@@ -35,6 +35,35 @@ async def subscribe_kb(args: str | None = None, is_new: bool = False):
     ])
 
 
+async def process_referral_start(bot: Bot, message: Message, args: str, is_new: bool):
+    """Обрабатывает реферальную привязку при /start ref_{user_id}."""
+    if not is_new or not args.startswith("ref_"):
+        return
+
+    ref_part = args[4:]
+    if not ref_part.isdigit():
+        return
+
+    referrer_tg_id = int(ref_part)
+    linked = await link_referral(referrer_tg_id, message.from_user.id)
+    if not linked:
+        return
+
+    await update_balance(message.from_user.id, 1)
+    await update_balance(referrer_tg_id, 1)
+    await message.answer(LEXICON_MESSAGES["ref_bonus_new_user"])
+
+    try:
+        await bot.send_message(
+            referrer_tg_id,
+            LEXICON_MESSAGES["ref_notify_referrer"].format(
+                first_name=message.from_user.first_name or "Пользователь"
+            )
+        )
+    except Exception:
+        pass
+
+
 async def run_start_logic(message: Message, user_id: int, args: str | None, state: FSMContext):
     """Основная логика /start после проверки подписки."""
     await state.clear()
@@ -60,6 +89,7 @@ async def start_cmd(message: Message, command: CommandObject, state: FSMContext,
     }
     _, is_new = await create_user(**user_data)
 
+    await process_referral_start(bot, message, command.args or "", is_new)
 
     # Если пользователь не подписан на обязательный канал, блокируем доступ
     # и выводим кнопку для подписки, передавая аргументы (например, ID стиля)
@@ -99,6 +129,7 @@ async def check_sub_cb(callback: CallbackQuery, bot: Bot, state: FSMContext):
         pass
 
     if is_new:
+        await process_referral_start(bot, callback.message, args or "", is_new)
         await callback.message.answer(
             LEXICON_MESSAGES["sub_bonus"],
             reply_markup=await menu_kb()
@@ -106,3 +137,4 @@ async def check_sub_cb(callback: CallbackQuery, bot: Bot, state: FSMContext):
 
     await run_start_logic(callback.message, callback.from_user.id, args, state)
     await callback.answer()
+
