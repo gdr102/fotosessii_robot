@@ -117,6 +117,23 @@ async def create_order(tg_id: int, stars: int, purchased_credits: int, payment_i
         if not user:
             return None
 
+        # Ищем незавершенный заказ
+        pending_order = await session.scalar(
+            select(db.Order)
+            .where(db.Order.user_id == user.id, db.Order.status == 'pending')
+            .limit(1)
+        )
+
+        if pending_order:
+            # Обновляем старый заказ вместо создания нового
+            pending_order.payment_id = payment_id
+            pending_order.purchased_credits = purchased_credits
+            pending_order.spent = stars
+            pending_order.timestamp = get_msk_time()
+            await session.commit()
+            await session.refresh(pending_order)
+            return pending_order
+
         new_order = db.Order(
             user_id=user.id,
             payment_id=payment_id,

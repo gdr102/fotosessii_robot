@@ -21,12 +21,8 @@ router = Router()
 
 @router.callback_query(F.data == "buy_credits")
 async def buy_credits_start(callback: types.CallbackQuery):
-    """Начинает процесс покупки: показывает список тарифов. 
-    Блокирует создание нового заказа, если есть незавершенный."""
-    pending_order = await get_pending_order(callback.from_user.id)
-    if pending_order:
-        await callback.answer(LEXICON_MESSAGES["pay_pending_exist"], show_alert=True)
-        return
+    """Начинает процесс покупки: показывает список тарифов."""
+
 
     await safe_navigate_text(
         callback,
@@ -61,11 +57,6 @@ async def buy_credits_amount(callback: types.CallbackQuery):
             LEXICON_MESSAGES["pay_min_amount"].format(min_stars=PAYMENT_MIN_STARS),
             show_alert=True
         )
-        return
-
-    pending_order = await get_pending_order(callback.from_user.id)
-    if pending_order:
-        await callback.answer(LEXICON_MESSAGES["pay_pending_exist"], show_alert=True)
         return
 
     invoice_payload = f"topup:{callback.from_user.id}:{stars}:{uuid4().hex}"
