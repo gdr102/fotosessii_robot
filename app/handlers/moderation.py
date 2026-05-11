@@ -16,6 +16,7 @@ from app.system.config import (
     ADMIN_REFUND_CHAT_ID,
     ADMIN_PUBLIC_CHANNEL_ID,
     TOKEN_TG,
+    BOT_URL
 )
 from app.system.lexicon import LEXICON_MESSAGES, LEXICON_BUTTONS
 
@@ -141,7 +142,7 @@ async def admin_publish_final(callback: types.CallbackQuery):
 
     post_kb = types.InlineKeyboardMarkup(inline_keyboard=[
         [types.InlineKeyboardButton(text=LEXICON_BUTTONS["btn_pub_apply"],
-                              url=f"https://t.me/FotosessII_robot?start={prompt_id}",
+                              url=f"https://t.me/{BOT_URL}?start={prompt_id}",
                               style="danger")]
     ])
 

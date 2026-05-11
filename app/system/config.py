@@ -13,6 +13,8 @@ ADMIN_REFUND_CHAT_ID = int(os.getenv('ADMIN_REFUND_CHAT_ID'))
 ADMIN_PUBLIC_CHANNEL_ID = int(os.getenv('ADMIN_PUBLIC_CHANNEL_ID'))
 PAYMENT_MIN_STARS = int(os.getenv('PAYMENT_MIN_STARS', 50))
 ADMINS = [int(x.strip()) for x in os.getenv('ADMINS', '').split(',') if x.strip()]
+BOT_URL = os.getenv('BOT_URL', 'FotosessII_robot')
+CHANNEL_URL = os.getenv('CHANNEL_URL', 'FotosessII_Pro')
 
 if not TOKEN_TG:
     raise RuntimeError('Environment variable TOKEN_TG is required')

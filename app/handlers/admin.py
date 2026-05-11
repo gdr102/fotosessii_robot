@@ -14,12 +14,12 @@ from aiogram.types import (
 
 from app.database.requests import get_all_user_tg_ids, get_user, update_balance
 from app.fsm.creative import AdminBroadcastStates, AdminPostStates, AdminCreditsStates
-from app.system.config import ADMINS, ADMIN_PUBLIC_CHANNEL_ID
+from app.system.config import ADMINS, ADMIN_PUBLIC_CHANNEL_ID, BOT_URL
 from app.system.lexicon import LEXICON_MESSAGES, LEXICON_BUTTONS
 
 router = Router()
 
-POST_FOOTER = '\n\n💬 <a href="https://t.me/+huj-lW23s0U2MTRi">Канал</a> | <a href="https://t.me/FotosessII_robot">Бот</a> 🤖'
+POST_FOOTER = f'\n\n💬 <a href="https://t.me/+huj-lW23s0U2MTRi">Канал</a> | <a href="https://t.me/{BOT_URL}">Бот</a> 🤖'
 
 
 def is_admin(user_id: int, chat_id: int) -> bool:
